@@ -146,3 +146,16 @@ void Neuron::decrease_weight()
 }
 
 Neuron::Neuron() {}
+Neuron::Neuron(string _name)
+{
+	name = _name;
+}
+
+bool Neuron::recognize(int** matrix)
+{
+	setup_input(matrix);
+	get_axon();
+	get_weight_sum();
+
+	return check_result();
+}

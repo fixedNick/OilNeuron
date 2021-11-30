@@ -21,8 +21,6 @@ public:
 	files_data();
 	files_data(string _matrix_name, const int& _good_files_count, const int& _bad_files_count, const string& _good_files_directory, const string& _bad_files_directory);
 	void get_matrixes_from_files();
-
-private:
 	int** get_matrix_from_file(string filename);
 };
 

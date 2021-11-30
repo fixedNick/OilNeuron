@@ -13,6 +13,7 @@ void print_menu(int& operation)
 {
 	cout << "0. Exit" << endl;
 	cout << "1. Study neuron" << endl;
+	cout << "2. Search for oil" << endl;
 	cout << "Your choice: ";
 	cin >> operation;
 }
@@ -30,7 +31,7 @@ void writeline(string text)
 
 Neuron study(files_data fd)
 {
-	Neuron neuron = Neuron();
+	Neuron neuron = Neuron(fd.matrix_name);
 	int restudy = 1;
 	int iterations = 0;
 	while (restudy != 0) 
@@ -64,6 +65,35 @@ Neuron study(files_data fd)
 	writer.close();
 
 	return neuron;
+}
+
+void start_dig(int neuron_number)
+{
+	// 1. Получаем матрицы элементов, одна из них должна быть выбранной пользователем, то есть обязательно завести все матрицы
+	// + 1/n леывые матрицы
+	// 2. делаем цикл по полученным матрицам
+	// 3. Пытаемся распознать матрицу выбранным нейроном
+	// 4. Если не получилось - используем все остальные нейроны ->
+	// 5. -> Если получилось - показываем, что за элемент нашли
+	// 6. -> Если нет - Пишем, что неизвестный элемент
+	// 7.В этом месте может предложить запомнить его матрицу, дать ему название, чтобы если элемент будет встрчен еще раз,
+	// то мы могли его распознать
+
+	files_data fd = files_data();
+	int examples_count = 10;
+	vector<int**> examples_matrix; // 1.
+	for (int i = 0; i < examples_count; i++)
+	{
+		auto matrix = fd.get_matrix_from_file("examples/" + to_string(i) + ".txt");
+		if (matrix == NULL)
+			continue;
+		examples_matrix.push_back(matrix);
+	}
+
+	for (auto matrix : examples_matrix) // 2.
+	{
+		Neurons[neuron_number].recognize(matrix);
+	}
 }
 
 int main()
@@ -102,6 +132,28 @@ int main()
 
 			auto n = study(fd);
 			Neurons.push_back(n);	
+		}
+		else if (operation == 2)
+		{
+			if (Neurons.size() == 0)
+			{
+				writeline("You don't have any studied neurons");
+				continue;
+			}
+			
+			writeline("Choose witch product you want to dig from earth: ");
+			for (int i = 0; i < Neurons.size(); i++)
+				writeline(to_string(i) + ". " + Neurons[i].name);
+
+			int nId;
+			cin >> nId;
+			if (nId >= Neurons.size() || nId < 0)
+			{
+				writeline("Invalid product number");
+				continue;
+			}
+
+			start_dig(nId);
 		}
 	}
 

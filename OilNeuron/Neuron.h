@@ -10,6 +10,7 @@ class Neuron
 public:
 	static const int cols = 50, rows = 50;
 	static const int weight_limit = 100000;
+	string name;
 	int weight[cols][rows];
 	int input_matrix[cols][rows];
 	void get_axon();
@@ -17,9 +18,11 @@ public:
 	bool check_result();
 	bool load_weight_from_file();
 	void recognize_letter();
+	bool recognize(int** matrix);
 	void study(bool real_result, int& restudy);
 	void setup_input(int** p);
 	Neuron();
+	Neuron(string _name);
 	int axon[cols][rows];
 	int weight_sum;
 	void add_weight();
