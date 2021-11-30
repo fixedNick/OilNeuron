@@ -92,8 +92,27 @@ void start_dig(int neuron_number)
 
 	for (auto matrix : examples_matrix) // 2.
 	{
-		Neurons[neuron_number].recognize(matrix);
+		auto choosen_neuron_result = Neurons[neuron_number].recognize(matrix);
+		if (choosen_neuron_result == false)
+		{
+			// Пары (номер нейрона, какую сумму весов получил)
+			vector<pair<int, int>> weights;
+			for (int i = 0; i < Neurons.size(); i++)
+			{
+				if (i == neuron_number) continue;
+				auto axon_weight = Neurons[i].get_weight_sum();
+				pair<int, int> neuron_and_weight = pair<int, int>(neuron_number, axon_weight);
+				weights.push_back(neuron_and_weight);
+			}
+			sort_vector(weights); // !K
+
+		}
 	}
+}
+
+void sort_vector(vector<pair<int, int>>& v)
+{
+	//
 }
 
 int main()
