@@ -139,12 +139,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DigFossil.cpp" />
+    <ClCompile Include="Fossil.cpp" />
     <ClCompile Include="Neuron.cpp" />
     <ClCompile Include="OilNeuron.cpp" />
     <ClCompile Include="files_data.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DigFossil.h" />
     <ClInclude Include="files_data.h" />
+    <ClInclude Include="Fossil.h" />
     <ClInclude Include="Neuron.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

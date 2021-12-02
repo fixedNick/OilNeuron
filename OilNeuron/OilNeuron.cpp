@@ -4,16 +4,18 @@
 #include <fstream>
 #include "files_data.h"
 #include "Neuron.h"
+#include "Fossil.h"
+#include "DigFossil.h"
 
 using namespace std;
 
-vector<Neuron> Neurons;
+vector<Fossil> Fossils;
 
 void print_menu(int& operation)
 {
 	cout << "0. Exit" << endl;
-	cout << "1. Study neuron" << endl;
-	cout << "2. Search for oil" << endl;
+	cout << "1. Add fossil and study that neurons" << endl;
+	cout << "2. Search for fossil" << endl;
 	cout << "Your choice: ";
 	cin >> operation;
 }
@@ -28,10 +30,10 @@ void writeline(string text)
 	write(text);
 	cout << endl;
 }
-
+// todo: load_neurons
 Neuron study(files_data fd)
 {
-	Neuron neuron = Neuron(fd.matrix_name);
+	Neuron neuron = Neuron(fd); // Подкидываем всю информацию о хороших/плохих матрицах и название в сам объект нейрона, дабы после не сверяться с files_data
 	int restudy = 1;
 	int iterations = 0;
 	while (restudy != 0) 
@@ -67,7 +69,7 @@ Neuron study(files_data fd)
 	return neuron;
 }
 
-void start_dig(int neuron_number)
+void start_dig(Fossil fossil_recognizer)
 {
 	// 1. Получаем матрицы элементов, одна из них должна быть выбранной пользователем, то есть обязательно завести все матрицы
 	// + 1/n леывые матрицы
@@ -79,40 +81,44 @@ void start_dig(int neuron_number)
 	// 7.В этом месте может предложить запомнить его матрицу, дать ему название, чтобы если элемент будет встрчен еще раз,
 	// то мы могли его распознать
 
-	files_data fd = files_data();
-	int examples_count = 10;
-	vector<int**> examples_matrix; // 1.
-	for (int i = 0; i < examples_count; i++)
-	{
-		auto matrix = fd.get_matrix_from_file("examples/" + to_string(i) + ".txt");
-		if (matrix == NULL)
-			continue;
-		examples_matrix.push_back(matrix);
-	}
+	// Сколько ископаемых будет копать бур
+	// (Сколько у нас есть наборов матриц для распознования)
+	vector<DigFossil> set_of_dig_fossils;
+	int dig_fossils_count = 10;
 
-	for (auto matrix : examples_matrix) // 2.
+	for (int i = 0; i < dig_fossils_count; i++)
 	{
-		auto choosen_neuron_result = Neurons[neuron_number].recognize(matrix);
-		if (choosen_neuron_result == false)
+		DigFossil dig_fossil; // одно из ископаемых, которое мы будем распозновать нашим выбранным ископаемым
+		// Нет времени искать адекватное решение узнать сколько файлов в директории, поэтому все ископаемые, которые мы подаем на вход имею 3 матрицы, то есть 3 элемента для распознования
+		// Нужен ради метода считывания матрицы из файла (get_matrix_from_file)
+		files_data fd = files_data();
+		int files_in_dig_fossil_directory = 3; // Можем считывать в будущем и поменять логику дальнейшей работы
+		for (int fe = 0; fe < files_in_dig_fossil_directory; fe++)
 		{
-			// Пары (номер нейрона, какую сумму весов получил)
-			vector<pair<int, int>> weights;
-			for (int i = 0; i < Neurons.size(); i++)
-			{
-				if (i == neuron_number) continue;
-				auto axon_weight = Neurons[i].get_weight_sum();
-				pair<int, int> neuron_and_weight = pair<int, int>(neuron_number, axon_weight);
-				weights.push_back(neuron_and_weight);
-			}
-			sort_vector(weights); // !K
-
+			// examples_to_dig/0/0.txt - Приме пути. т.к. пока количество файлов фиксированное, то в папке:
+			// examples_to_dig/0/ будет лежать три файла:
+			// 0.txt
+			// 1.txt
+			// 2.txt
+			string path = "examples_to_dig/" + to_string(i) + "/" + to_string(fe) + ".txt";
+			auto matrix = fd.get_matrix_from_file(path); // считываем элемент ископаемого(матрицу)
+			if(matrix != NULL)
+				dig_fossil.add_element(matrix); // добавляем ископаемому элемент
 		}
 	}
-}
 
-void sort_vector(vector<pair<int, int>>& v)
-{
-	//
+	// В данный момент мы считали и создали все ископаемые, которые встретятся у нас на пути при раскопках
+	// Начинаем раскопки, встречая на пути ископаемые fossil_to_dig
+
+	int counter = 0;
+	for (auto fossil_to_dig : set_of_dig_fossils)
+	{
+		auto result = fossil_recognizer.is_digged_fossil_is_equal_this_fossil(fossil_to_dig);
+		if (result == true)
+			writeline("Digged fossil number #" + to_string(counter) + " is " + fossil_recognizer.name);
+		else
+			writeline("Digged fossil number #" + to_string(counter) + " is unknown");
+	}
 }
 
 int main()
@@ -129,50 +135,70 @@ int main()
 		}
 		else if (operation == 1)
 		{
-			string good_files_directory, bad_files_directory;
-			int good_files_count, bad_files_count;
+			// Запись данных об ископаемых
+			Fossil fossil = Fossil();
+			cout << "Enter fossil name: ";
+			cin >> fossil.name;
+			cout << "Enter neurons of fossil count: ";
+			int fossil_neurons_count = -1;
+			cin >> fossil_neurons_count;
 
-			write("Enter good files directory name:");
-			cin >> good_files_directory;
-			write("Enter good files count:");
-			cin >> good_files_count;
+			if (fossil_neurons_count <= 0)
+			{
+				cout << "Your fossil need some neurons..." << endl;
+				continue;
+			}
 
-			write("Enter bad files directory name:");
-			cin >> bad_files_directory;
-			write("Enter bad files count:");
-			cin >> bad_files_count;
+			for (int i = 0; i < fossil_neurons_count; i++)
+			{
+				files_data fd = files_data();
+				string name;
 
-			string matrix_name;
-			write("Enter matrix name: ");
-			cin >> matrix_name;
+				write("Enter fossil element name: ");
+				cin >> name;
 
-			files_data fd(matrix_name, good_files_count, bad_files_count, good_files_directory, bad_files_directory);
-			fd.get_matrixes_from_files();
+				write("Enter good files directory name:");
+				cin >> fd.good_files_directory;
+				write("Enter good files count:");
+				cin >> fd.good_files_count;
 
-			auto n = study(fd);
-			Neurons.push_back(n);	
+				write("Enter bad files directory name:");
+				cin >> fd.bad_files_directory;
+				write("Enter bad files count:");
+				cin >> fd.bad_files_count;
+
+				fd.get_matrixes_from_files();
+				auto fossil_studied_neuron = study(fd);
+				fossil_studied_neuron.name = name;
+				fossil_studied_neuron.fd = fd;
+				fossil.add_neuron(fossil_studied_neuron);
+			}
+
+			Fossils.push_back(fossil);
 		}
 		else if (operation == 2)
 		{
-			if (Neurons.size() == 0)
+			// Поиск нашего ископаемого среди наборов элементов
+			if (Fossils.size() == 0)
 			{
-				writeline("You don't have any studied neurons");
+				writeline("You don't have any fossils");
 				continue;
 			}
 			
 			writeline("Choose witch product you want to dig from earth: ");
-			for (int i = 0; i < Neurons.size(); i++)
-				writeline(to_string(i) + ". " + Neurons[i].name);
+			for (int i = 0; i < Fossils.size(); i++)
+				writeline(to_string(i) + ". " + Fossils[i].name);
 
 			int nId;
 			cin >> nId;
-			if (nId >= Neurons.size() || nId < 0)
+			if (nId >= Fossils.size() || nId < 0)
 			{
-				writeline("Invalid product number");
+				writeline("Invalid fossil number");
 				continue;
 			}
 
-			start_dig(nId);
+			// Выбран поиск ископаемого Fossils[nId];
+			start_dig(Fossils[nId]);
 		}
 	}
 

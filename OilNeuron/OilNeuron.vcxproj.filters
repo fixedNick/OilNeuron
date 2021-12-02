@@ -24,12 +24,24 @@
     <ClCompile Include="files_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Fossil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DigFossil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Neuron.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="files_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Fossil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DigFossil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

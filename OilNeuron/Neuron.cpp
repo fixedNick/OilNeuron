@@ -150,6 +150,10 @@ Neuron::Neuron(string _name)
 {
 	name = _name;
 }
+Neuron::Neuron(files_data _fd)
+{
+	fd = _fd;
+}
 
 bool Neuron::recognize(int** matrix)
 {
